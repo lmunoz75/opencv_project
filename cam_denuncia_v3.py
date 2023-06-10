@@ -19,15 +19,14 @@ def set_ROI(event, x, y, flags, param):
             botRight_clicked = False
 
         if topLeft_clicked == False:
-            pt1 = (x, y) 
+            pt1 = (x, y)
             topLeft_clicked = True
         elif botRight_clicked == False:
-            pt2 = (x, y) 
-            botRight_clicked = True
-            
+            pt2 = (x, y)
+            botRight_clicked = True      
 
 
-def cam_rec_format(image, start_time, color=(0, 0, 0), thick=2):    
+def cam_rec_format(image, start_time, color=(0, 0, 0), thick=2):
     elapsed = f"{datetime.now() - start_time}"[:-3]
     cv2.putText(image, text=elapsed, 
                 org=(ww - int(2 * ww / 3) + 40, hh - 40), 
@@ -62,8 +61,24 @@ def cam_rec_format(image, start_time, color=(0, 0, 0), thick=2):
     seconds = int(elapsed.split(":")[-1][:2])
     if seconds % 2 == 0:
         cv2.circle(image, (44, 36), 12, color=(0, 0, 255), thickness=-1)
-            
+    
     return image
+
+
+def pixelate_ROI(image):
+    global pt1, pt2, topLeft_clicked, botRight_clicked
+    
+    if topLeft_clicked and botRight_clicked:
+        ROI = image[pt1[1]:pt2[1], pt1[0]:pt2[0], :]
+        roi_hh, roi_ww, _ = ROI.shape
+        roi_h, roi_w = int(roi_hh/16), int(roi_ww/16)
+        
+        ROI = cv2.resize(ROI, (roi_w, roi_h), interpolation=cv2.INTER_AREA)
+        ROI = cv2.resize(ROI, (roi_ww, roi_hh), interpolation=cv2.INTER_AREA)
+        
+        image[pt1[1]:pt2[1], pt1[0]:pt2[0], :] = ROI
+        
+    return image     
 
 
 cv2.namedWindow("Video")
@@ -71,28 +86,14 @@ cv2.setMouseCallback("Video", set_ROI)
 
 cap = cv2.VideoCapture(0)
 ww, hh = int(cap.get(3)), int(cap.get(4))
-w, h = int(ww/16), int(hh/16)
 start_rec_time = datetime.now()
 
 while True:
     ret, frame = cap.read()
     
     if ret:
-        # Se gira la imagen en el eje vertical
         out = cv2.flip(frame, 1)
-        
-        # Se pixelea la imagen en el ROI
-        if topLeft_clicked and botRight_clicked:
-            ROI = out[pt1[1]:pt2[1], pt1[0]:pt2[0], :]
-            roi_hh, roi_ww, _ = ROI.shape
-            roi_h, roi_w = int(roi_hh/25), int(roi_ww/25)
-        
-            ROI = cv2.resize(ROI, (roi_w, roi_h), interpolation=cv2.INTER_AREA)
-            ROI = cv2.resize(ROI, (roi_ww, roi_hh), interpolation=cv2.INTER_AREA)
-            
-            out[pt1[1]:pt2[1], pt1[0]:pt2[0], :] = ROI
-            
-        # Se le da formato de camara de grabacion a la imagen
+        out = pixelate_ROI(out)
         out = cam_rec_format(out, color=(0, 0, 255), start_time=start_rec_time)
         
         cv2.imshow("Video", out)
@@ -103,4 +104,3 @@ while True:
 
 cap.release()
 cv2.destroyAllWindows()
-
