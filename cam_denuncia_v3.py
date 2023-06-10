@@ -76,6 +76,11 @@ def pixelate_ROI(image):
         ROI = cv2.resize(ROI, (roi_w, roi_h), interpolation=cv2.INTER_AREA)
         ROI = cv2.resize(ROI, (roi_ww, roi_hh), interpolation=cv2.INTER_AREA)
         
+        cv2.putText(image, text="Pixeleado Activo", 
+                    org=pt1, 
+                    fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, 
+                    fontScale=0.6, color=color, thickness=1)
+        
         image[pt1[1]:pt2[1], pt1[0]:pt2[0], :] = ROI
         
     return image     
