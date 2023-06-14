@@ -65,7 +65,7 @@ def cam_rec_format(image, start_time, color=(0, 0, 0), thick=2):
     return image
 
 
-def pixelate_ROI(image):
+def pixelate_ROI(image, color=(0, 0, 0)):
     global pt1, pt2, topLeft_clicked, botRight_clicked
     
     if topLeft_clicked and botRight_clicked:
@@ -77,7 +77,7 @@ def pixelate_ROI(image):
         ROI = cv2.resize(ROI, (roi_ww, roi_hh), interpolation=cv2.INTER_AREA)
         
         cv2.putText(image, text="Pixeleado Activo", 
-                    org=pt1, 
+                    org=(pt1[0], pt1[1] - 10), 
                     fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, 
                     fontScale=0.6, color=color, thickness=1)
         
