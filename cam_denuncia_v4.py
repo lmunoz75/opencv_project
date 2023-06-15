@@ -6,17 +6,17 @@ pt2 = (0, 0)
 topLeft_clicked = False
 botRight_clicked = False
 
-def insert_logo(image, logo_file):
+def insert_logo(image, logo_file, size=80):
     img_logo = cv2.imread(logo_file)
-    img_logo = cv2.resize(img_logo, (80, 80))
+    img_logo = cv2.resize(img_logo, (size, size))
     img_logo_gray = cv2.cvtColor(img_logo, cv2.COLOR_BGR2GRAY)
     tresh, mask = cv2.threshold(img_logo_gray, 128, 255, cv2.THRESH_BINARY)
     mask_inv = cv2.bitwise_not(mask)
     
-    ROI_fondo = image[-110:-30, -110:-30, :]
+    ROI_fondo = image[-(30+size):-30, -(30+size):-30, :]
     frente = cv2.bitwise_and(img_logo, img_logo, mask=mask_inv)
     fondo = cv2.bitwise_and(ROI_fondo, ROI_fondo, mask=mask)
-    image[-110:-30, -110:-30, :] = cv2.add(frente, fondo)
+    image[-(30+size):-30, -(30+size):-30, :] = cv2.add(frente, fondo)
     
     return image
     
@@ -114,7 +114,7 @@ while True:
         out = cv2.flip(frame, 1)
         out = pixelate_ROI(out, color=(0, 0, 255))
         out = cam_rec_format(out, color=(0, 0, 255), start_time=start_rec_time)
-        out = insert_logo(out, ".\\img\\incognito_logo.jpg")
+        out = insert_logo(out, ".\\img\\incognito_logo.jpg", size=100)
         
         cv2.imshow("Video", out)
     
